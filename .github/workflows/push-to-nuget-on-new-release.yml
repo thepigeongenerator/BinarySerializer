@@ -30,4 +30,4 @@ jobs:
       - name: push nuget package to github repo
         run: |
           dotnet nuget add source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --name "github" --username ${{ github.repository_owner }} --password ${{ secrets.GH_PACKAGE_KEY }} --store-password-in-clear-text
-          dotnet nuget push "BinarySerializer/bin/Release/ThePigeonGenerator.MonoGame.Render*.nupkg" --source "github" --skip-duplicate --no-symbols
+          dotnet nuget push "BinarySerializer/bin/Release/ThePigeonGenerator.Util*.nupkg" --source "github" --skip-duplicate --no-symbols
