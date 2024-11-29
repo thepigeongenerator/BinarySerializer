@@ -1,0 +1,33 @@
+name: push to nuget at new release
+
+on:
+  release:
+    types: published
+
+jobs:
+  verify-build-and-push-nuget:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 6.0.x
+
+
+      # compile & verify project
+      - name: restore dependencies
+        run: dotnet restore
+      - name: build the project
+        run: dotnet build --configuration Release --no-restore True -warnaserror
+      - name: test the build
+        run: dotnet test --no-build True --verbosity normal
+
+      # push the package to both repos
+      - name: push nuget package to nuget repo
+        run: dotnet nuget push "BinarySerializer/bin/Release/ThePigeonGenerator.Util*.nupkg" --api-key ${{ secrets.NUGET_PACKAGE_KEY }} --source "https://api.nuget.org/v3/index.json" --skip-duplicate --no-symbols
+      - name: push nuget package to github repo
+        run: |
+          dotnet nuget add source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --name "github" --username ${{ github.repository_owner }} --password ${{ secrets.GH_PACKAGE_KEY }} --store-password-in-clear-text
+          dotnet nuget push "BinarySerializer/bin/Release/ThePigeonGenerator.MonoGame.Render*.nupkg" --source "github" --skip-duplicate --no-symbols
