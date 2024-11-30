@@ -36,7 +36,7 @@ public static class BinarySerializer
         fixed (byte* pBuf = &buf[0])
         {
             // store the data of the pointer as the desired object
-            obj = (T?)ReflectionUtil.DeserializeStructure(t, pBuf, buf.Length);
+            obj = (T?)ReflectionUtil.DeserializeStructure(t, pBuf);
         }
 
         return obj;

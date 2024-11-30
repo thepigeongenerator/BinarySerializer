@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 
 namespace Test;
@@ -60,11 +61,17 @@ public class Tests
         public StructureWithPublicFieldsAndStructs() { }
     }
 
-    public struct StructureWithArray
+    public struct StructureWithArray : IEquatable<StructureWithArray>
     {
         public int[] array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
 
         public StructureWithArray() { }
+
+
+        public bool Equals(StructureWithArray other)
+        {
+            return array.SequenceEqual(other.array);
+        }
     }
 
 #pragma warning disable CS0414 // remove unused fields
