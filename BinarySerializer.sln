@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinarySerializer", "BinarySerializer\BinarySerializer.csproj", "{8833D32B-ADB6-4D55-9562-36B273BC0F4B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinarySerializer", "BinarySerializer\BinarySerializer.csproj", "{3195488A-2CEF-49B9-9F47-C8C46D0B1656}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", "{76F0A128-5AE2-46BC-BBA6-D76279BA7CBE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +13,19 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8833D32B-ADB6-4D55-9562-36B273BC0F4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8833D32B-ADB6-4D55-9562-36B273BC0F4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8833D32B-ADB6-4D55-9562-36B273BC0F4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8833D32B-ADB6-4D55-9562-36B273BC0F4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3195488A-2CEF-49B9-9F47-C8C46D0B1656}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3195488A-2CEF-49B9-9F47-C8C46D0B1656}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3195488A-2CEF-49B9-9F47-C8C46D0B1656}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3195488A-2CEF-49B9-9F47-C8C46D0B1656}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76F0A128-5AE2-46BC-BBA6-D76279BA7CBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76F0A128-5AE2-46BC-BBA6-D76279BA7CBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76F0A128-5AE2-46BC-BBA6-D76279BA7CBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76F0A128-5AE2-46BC-BBA6-D76279BA7CBE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {BEDFDEE4-EFB2-4187-9EF9-A26B4095164F}
+		SolutionGuid = {B0164D07-61EE-4B90-B6B0-E4309378158F}
 	EndGlobalSection
 EndGlobal
