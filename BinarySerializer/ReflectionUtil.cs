@@ -67,11 +67,17 @@ internal static class ReflectionUtil
     {
         // if T is a primitive type (int, float, bool), we can just convert it straight away
         if (t.IsPrimitive)
+        {
             Marshal.StructureToPtr(obj, (IntPtr)buf, false);
+            return;
+        }
 
         // if T is an array, we can just serialize the array
         if (t.IsArray)
+        {
             SerializeArray(t, obj, buf, size);
+            return;
+        }
 
         // loop through each field in t, and call ourselves
         int i = 0;
