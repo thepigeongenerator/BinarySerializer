@@ -1,10 +1,25 @@
 ﻿#nullable enable
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 namespace ThePigeonGenerator.Util
 {
     public static class BinarySerializer
     {
+        // utility method for deserializing from a buffer pointer
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe T? Deserialize<T>(byte* pBuf)
+        {
+            return Marshal.PtrToStructure<T>((IntPtr)pBuf);
+        }
+
+        // utility method for serializing into a buffer pointer
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe void Serialize<T>(T obj, byte* pBuf) where T : struct
+        {
+            Marshal.StructureToPtr<T>(obj, (IntPtr)pBuf, false);
+        }
+
         // deserializes T from the specified buffer
         public static unsafe T? Deserialize<T>(byte[] buf) where T : struct
         {
@@ -15,7 +30,7 @@ namespace ThePigeonGenerator.Util
             fixed (byte* pBuf = &buf[0])
             {
                 // store the data of the pointer as the desired object
-                obj = Marshal.PtrToStructure<T>((IntPtr)pBuf);
+                obj = Deserialize<T>(pBuf);
             }
 
             return obj;
@@ -31,7 +46,7 @@ namespace ThePigeonGenerator.Util
             fixed (byte* pBuf = &buf[0])
             {
                 // store the structure to the pointer which points to the buffer
-                Marshal.StructureToPtr(obj, (IntPtr)pBuf, false);
+                Serialize<T>(obj, pBuf);
             }
 
             return buf;
@@ -50,9 +65,9 @@ namespace ThePigeonGenerator.Util
             for (int i = 0; i < arr.Length; i++)
             {
                 // get a pointer using the input array's index to map everything correctly
-                fixed (byte* bufPtr = &buf[i * size])
+                fixed (byte* pBuf = &buf[i * size])
                 {
-                    arr[i] = Marshal.PtrToStructure<T>((IntPtr)bufPtr);
+                    arr[i] = Deserialize<T>(pBuf);
                 }
             }
 
@@ -69,10 +84,10 @@ namespace ThePigeonGenerator.Util
             for (int i = 0; i < arr.Length; i++)
             {
                 // get a pointer using the input array's index to map everything correctly
-                fixed (byte* bufPtr = &buf[i * size])
+                fixed (byte* pBuf = &buf[i * size])
                 {
                     // store the structure to the pointer in the buffer
-                    Marshal.StructureToPtr(arr[i], (IntPtr)bufPtr, false);
+                    Serialize<T>(arr[i], pBuf);
                 }
             }
 
