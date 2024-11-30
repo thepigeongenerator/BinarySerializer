@@ -10,6 +10,7 @@ internal static class ReflectionUtil
 {
     private const BindingFlags BINDING_FLAGS = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
 
+    #region size utility
     // gets the size of an array datastructure
     private static int GetArraySize(Type t, object obj)
     {
@@ -41,10 +42,12 @@ internal static class ReflectionUtil
         // sum this result
         return (
             from f in t.GetFields(BINDING_FLAGS)
-            select GetStructureSize(f.FieldType, f.GetValue(obj))
+            select GetStructureSize(f.FieldType, obj == null ? null : f.GetValue(obj))
         ).Sum();
     }
+    #endregion // size utility
 
+    #region serialization
     private static unsafe void SerializeArray(Type t, object obj, byte* buf, int size)
     {
         Type elmtType = t.GetElementType() ?? throw new NullReferenceException($"failed to get the element type of '{t.FullName}'!");
@@ -59,7 +62,7 @@ internal static class ReflectionUtil
         for (int i = 0; i < arr.Length; i++)
         {
             object elmt = arr.GetValue(i) ?? throw new NullReferenceException($"failed to get an element with the index of '{i}' in array of type '{t.FullName}'");
-            SerializeStructure(elmtType, elmt, buf + (elmtSize * i), elmtSize);
+            SerializeStructure(elmtType, elmt, &buf[elmtSize * i], elmtSize);
         }
     }
 
@@ -83,11 +86,53 @@ internal static class ReflectionUtil
         int i = 0;
         foreach (FieldInfo f in t.GetFields(BINDING_FLAGS))
         {
-            // get the structure size of this
-            int s = GetStructureSize(f.FieldType, obj);
+            // get the structure size of this field
             object val = f.GetValue(obj) ?? throw new NullReferenceException($"field '{f.FieldType.FullName}' in '{t.FullName}' is not allowed to be null!");
-            SerializeStructure(f.FieldType, val, buf + i, s);
-            i += size;
+            int s = GetStructureSize(f.FieldType, val);
+            SerializeStructure(f.FieldType, val, &buf[i], s);
+            i += s;
         }
     }
+    #endregion // serialization
+
+    #region deserialization
+    private static unsafe object DeserializeArray(Type t, byte* buf, int size)
+    {
+        throw new NotImplementedException();
+    }
+
+    public static unsafe object? DeserializeStructure(Type t, byte* buf, int size)
+    {
+        // if T is a primitive type, we can just convert straight away
+        if (t.IsPrimitive)
+            return Marshal.PtrToStructure((IntPtr)buf, t);
+
+        // if T is an array, use the array deserialization
+        if (t.IsArray)
+            return DeserializeArray(t, buf, size);
+
+        // if T isn't a value type, we don't support it
+        if (t.IsValueType == false)
+            throw new NotSupportedException($"trying to deserialize reference type '{t.FullName}', reference types are unsupported due to their unknown size.");
+
+        // create an instance of the object using the activator
+        object? obj = Activator.CreateInstance(t);
+        if (obj == null) return null;
+
+        // loop through each field in T, and call ourselves.
+        int i = 0;
+        foreach (FieldInfo f in t.GetFields(BINDING_FLAGS))
+        {
+            // get the structure size of this field
+            int s = GetStructureSize(f.FieldType, null);                  // ISSUE: we do not have access to the object's instance because we are creating it.
+
+            // add the index to the buffer pointer to offset it, thus reading from another part of the array
+            object? val = DeserializeStructure(f.FieldType, &buf[i], s);
+            f.SetValue(obj, val);
+            i += s;
+        }
+
+        return obj;
+    }
+    #endregion
 }

@@ -7,19 +7,33 @@ public class StructTests
     public static IEnumerable<object[]> GetTestData()
     {
         yield return new object[] { new StructureWithPublicFields() };
-        // yield return new object[] { new StructureWithPublicFieldsAndStructs() };
+        yield return new object[] { new StructureWithPublicFieldsAndStructs() };
         yield return new object[] { new StructureWithPrivateFields() };
-        // yield return new object[] { new StructureWithPrivateFieldsAndStructs() };
+        yield return new object[] { new StructureWithPrivateFieldsAndStructs() };
     }
 
     [Theory]
     [MemberData(nameof(GetTestData))]
-    public void Serialize_Deserialize_Struct<T>(T x) where T : struct
+    public void Serialize_Deserialize<T>(T x) where T : struct
     {
         byte[] res = BinarySerializer.Serialize(x);
         T? y = BinarySerializer.Deserialize<T>(res);
 
         Assert.Equal(x, y);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetTestData))]
+    public void Serialize<T>(T x) where T : struct
+    {
+        try
+        {
+            _ = BinarySerializer.Serialize(x);
+        }
+        catch
+        {
+            Assert.Fail("an error occurred when trying to serialize!");
+        }
     }
 
     private struct StructureWithPublicFields
@@ -41,21 +55,22 @@ public class StructTests
         public StructureWithPublicFieldsAndStructs() { }
     }
 
+#pragma warning disable CS0414 // remove unused fields
     private struct StructureWithPrivateFields
     {
-        int i1 = default;
-        int i2 = default;
-        bool b1 = true;
-        bool b2 = false;
+        private int i1 = int.MaxValue;
+        private int i2 = int.MinValue;
+        private bool b1 = true;
+        private bool b2 = false;
 
         public StructureWithPrivateFields() { }
     }
 
     private struct StructureWithPrivateFieldsAndStructs
     {
-        StructureWithPrivateFields s = default;
-        DateTime time = DateTime.Now;
-        int x = int.MaxValue;
+        private StructureWithPrivateFields s = default;
+        private DateTime time = DateTime.Now;
+        private int x = int.MaxValue;
 
         public StructureWithPrivateFieldsAndStructs() { }
     }

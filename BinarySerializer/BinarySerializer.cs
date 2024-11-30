@@ -1,23 +1,22 @@
 ﻿#nullable enable
 using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 namespace ThePigeonGenerator.Util
 {
     public static class BinarySerializer
     {
         // deserializes T from the specified buffer
-        [Obsolete("under development")]
         public static unsafe T? Deserialize<T>(byte[] buf) where T : struct
         {
             // I am assuming that the programmer is not stupid and will read from the correct type of buffer, hence me not checking the sizes
+            Type t = typeof(T);
             T? obj;
 
             // get the array as a pointer
             fixed (byte* pBuf = &buf[0])
             {
                 // store the data of the pointer as the desired object
-                obj = Marshal.PtrToStructure<T>((IntPtr)pBuf);
+                obj = (T?)ReflectionUtil.DeserializeStructure(t, pBuf, buf.Length);
             }
 
             return obj;
