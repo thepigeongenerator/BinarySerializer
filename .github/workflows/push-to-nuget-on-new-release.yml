@@ -24,7 +24,7 @@ jobs:
       - name: build the project
         run: dotnet build --configuration Release --no-restore True -warnaserror
       - name: test the build
-        run: dotnet test --no-build True --verbosity normal
+        run: dotnet test
 
       # push the package to both repos
       - name: push nuget package to nuget repo
