@@ -20,7 +20,7 @@ public class IntegerTests
 
     [Theory]
     [MemberData(nameof(GetTestData))]
-    public void Serialize_Deserialize_Equality<T>(T x) where T : struct
+    public void Serialize_Deserialize_Equality<T>(T x, ulong val) where T : struct
     {
         byte[] res = BinarySerializer.Serialize(x);
         T? y = BinarySerializer.Deserialize<T>(res);

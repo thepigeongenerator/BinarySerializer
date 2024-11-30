@@ -11,16 +11,16 @@ namespace ThePigeonGenerator.Util
         public static unsafe T? Deserialize<T>(byte[] buf) where T : struct
         {
             // I am assuming that the programmer is not stupid and will read from the correct type of buffer, hence me not checking the sizes
-            //T? obj;
+            T? obj;
 
             // get the array as a pointer
             fixed (byte* pBuf = &buf[0])
             {
                 // store the data of the pointer as the desired object
-                //obj = Deserialize<T>(pBuf);
+                obj = Marshal.PtrToStructure<T>((IntPtr)pBuf);
             }
 
-            return null;
+            return obj;
         }
 
         // serializes the object into it's binary representation to the buffer
