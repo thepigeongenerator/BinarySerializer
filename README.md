@@ -15,7 +15,7 @@ Allows you to serialize and deserialize objects who's size is known to and from 
 3. Run the command listed above in the directory of the project you wish to install the package in.
 
 ## Contents
-| uwu                                                                        | Explanation                                                                            |
+| Method                                                                     | Explanation                                                                            |
 | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | `byte[]` `BinarySerializer`.[`Serialize`](#serialize)<`T`>(`T` obj)        | serializes the object into it's binary representation to the buffer which is returned. |
 | `void` `BinarySerializer`.[`Deserialize`](#deserialize)<`T`>(`byte[]` buf) | deserializes T from the specified buffer at `buf`.                                     |
