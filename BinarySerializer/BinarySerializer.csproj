@@ -10,7 +10,7 @@
     <PackageId>ThePigeonGenerator.Utils.BinarySerializer</PackageId>
     <PackageDescription>allows you to serialize and deserialize objects who's size is known to and from a byte array representing the data structure in binary</PackageDescription>
     <RepositoryUrl>https://github.com/thepigeongenerator/BinarySerializer</RepositoryUrl>
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
     <Authors>thepigeongenerator</Authors>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
