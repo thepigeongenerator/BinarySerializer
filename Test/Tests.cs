@@ -9,36 +9,39 @@ public class Tests
     // then testing having all bits 'true'
     public static IEnumerable<object[]> GetTestData()
     {
-        yield return new object[] { (byte)0x55 };
-        yield return new object[] { (ushort)0x5555 };
-        yield return new object[] { (uint)0x55555555 };
-        yield return new object[] { (ulong)0x5555555555555555 };
-        yield return new object[] { (sbyte)-1 };
-        yield return new object[] { (short)-1 };
-        yield return new object[] { (int)-1 };
-        yield return new object[] { (long)-1 };
-        yield return new object[] { new StructureWithPrivateFields() };
-        yield return new object[] { new StructureWithPrivateFieldsAndStructs() };
-        yield return new object[] { new StructureWithPublicFields() };
-        yield return new object[] { new StructureWithPublicFieldsAndStructs() };
-        yield return new object[] { new int[10] { int.MaxValue, 0, int.MaxValue, 1, int.MaxValue, 2, int.MaxValue, 3, int.MaxValue, 4 } };
-        yield return new object[] { new StructureWithArray() };
+        yield return new object[] { (byte)0x55, true };
+        yield return new object[] { (ushort)0x5555, true };
+        yield return new object[] { (uint)0x55555555, true };
+        yield return new object[] { (ulong)0x5555555555555555, true };
+        yield return new object[] { (sbyte)-1, true };
+        yield return new object[] { (short)-1, true };
+        yield return new object[] { (int)-1, true };
+        yield return new object[] { (long)-1, true };
+        yield return new object[] { new StructureWithPrivateFields(), true };
+        yield return new object[] { new StructureWithPrivateFieldsAndStructs(), true };
+        yield return new object[] { new StructureWithPublicFields(), true };
+        yield return new object[] { new StructureWithPublicFieldsAndStructs(), true };
+        yield return new object[] { new int[10] { int.MaxValue, 0, int.MaxValue, 1, int.MaxValue, 2, int.MaxValue, 3, int.MaxValue, 4 }, true };
+        yield return new object[] { new StructureWithArray(), true };
+        yield return new object[] { new StructureWithNonSerialized(0x55555555, 0x55555555), false };
     }
 
     [Theory]
     [MemberData(nameof(GetTestData))]
-    public void Serialize_Deserialize_Equality<T>(T x)
+    public void Serialize_Deserialize_Equality<T>(T x, bool equal)
     {
         byte[] res = BinarySerializer.Serialize(x);
         T? y = BinarySerializer.Deserialize<T>(res);
 
-        Assert.Equal(x, y);
+        if (equal) Assert.Equal(x, y);
+        else Assert.NotEqual(x, y);
     }
 
     [Theory]
     [MemberData(nameof(GetTestData))]
-    public void Serialize<T>(T x)
+    public void Serialize<T>(T x, bool equal)
     {
+        _ = equal;
         _ = BinarySerializer.Serialize(x);
     }
 
@@ -59,6 +62,20 @@ public class Tests
         public int x = int.MaxValue;
 
         public StructureWithPublicFieldsAndStructs() { }
+    }
+
+    public struct StructureWithNonSerialized
+    {
+        public int x = 0;
+
+        [NonSerialized]
+        public int y = 0;
+
+        public StructureWithNonSerialized(int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+        }
     }
 
     public struct StructureWithArray : IEquatable<StructureWithArray>

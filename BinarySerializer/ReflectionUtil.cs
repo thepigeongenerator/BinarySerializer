@@ -102,7 +102,7 @@ namespace ThePigeonGenerator.Util
             foreach (FieldInfo f in t.GetFields(BINDING_FLAGS))
             {
                 // fields with the NonSerialized attribute are not included
-                if (f.IsDefined(typeof(NonSerializedAttribute)) == false)
+                if (f.IsDefined(typeof(NonSerializedAttribute)))
                     continue;
 
                 // get the structure size of this field
@@ -157,7 +157,7 @@ namespace ThePigeonGenerator.Util
             foreach (FieldInfo f in t.GetFields(BINDING_FLAGS))
             {
                 // fields with the NonSerialized attribute are not included
-                if (f.IsDefined(typeof(NonSerializedAttribute)) == false)
+                if (f.IsDefined(typeof(NonSerializedAttribute)))
                     continue;
 
                 // get the structure size of this field
