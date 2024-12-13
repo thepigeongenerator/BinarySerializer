@@ -27,6 +27,8 @@ In C#, you can use the built-in functions defined in `File`;
 byte[] data = File.ReadAllBytes("./some/filepath.bin"); // reading the data stored at the path
 File.WriteAllBytes("/tmp/dontdelete.bin", data);        // writing to the binary file
 ```
+### Not serializing certain fields
+If you don't want to serialize some fields, you can utilise the built-in [`NonSerialized`](https://learn.microsoft.com/en-us/dotnet/api/system.nonserializedattribute) attribute
 
 [^1]: https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/built-in-
 [^2]: https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types
