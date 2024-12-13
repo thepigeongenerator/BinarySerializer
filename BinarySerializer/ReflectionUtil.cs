@@ -52,6 +52,7 @@ namespace ThePigeonGenerator.Util
             // sum this result
             return (
                 from f in t.GetFields(BINDING_FLAGS)
+                where f.IsDefined(typeof(NonSerializedAttribute)) == false // fields with the NonSerialized attribute are not included
                 select GetStructureSize(f.FieldType, obj == null ? null : f.GetValue(obj))
             ).Sum();
         }
@@ -100,6 +101,10 @@ namespace ThePigeonGenerator.Util
             int i = 0;
             foreach (FieldInfo f in t.GetFields(BINDING_FLAGS))
             {
+                // fields with the NonSerialized attribute are not included
+                if (f.IsDefined(typeof(NonSerializedAttribute)) == false)
+                    continue;
+
                 // get the structure size of this field
                 object val = f.GetValue(obj) ?? throw new NullReferenceException($"field '{f.FieldType.FullName}' in '{t.FullName}' is not allowed to be null!");
                 int s = GetStructureSize(f.FieldType, val);
@@ -151,6 +156,10 @@ namespace ThePigeonGenerator.Util
             int i = 0;
             foreach (FieldInfo f in t.GetFields(BINDING_FLAGS))
             {
+                // fields with the NonSerialized attribute are not included
+                if (f.IsDefined(typeof(NonSerializedAttribute)) == false)
+                    continue;
+
                 // get the structure size of this field
                 int s = GetStructureSize(f.FieldType, null, &buf[i]);
 

@@ -75,6 +75,7 @@ public class Tests
     }
 
 #pragma warning disable CS0414 // remove unused fields
+
     private struct StructureWithPrivateFields
     {
         private int i1 = int.MaxValue;
