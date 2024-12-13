@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFrameworks>net8.0;net6.0;net45;net40;net35;net20;netstandard2.0</TargetFrameworks>
+    <LangVersion>9.0</LangVersion>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -10,7 +11,7 @@
     <PackageId>ThePigeonGenerator.Utils.BinarySerializer</PackageId>
     <PackageDescription>allows you to serialize and deserialize objects who's size is known to and from a byte array representing the data structure in binary</PackageDescription>
     <RepositoryUrl>https://github.com/thepigeongenerator/BinarySerializer</RepositoryUrl>
-    <Version>0.1.2</Version>
+    <Version>0.1.3</Version>
     <Authors>thepigeongenerator</Authors>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
