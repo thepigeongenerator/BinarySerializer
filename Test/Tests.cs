@@ -23,6 +23,8 @@ namespace Test
             yield return new object[] { (int)-1, true };
             yield return new object[] { (long)-1, true };
             yield return new object[] { new int[10] { int.MaxValue, 0, int.MaxValue, 1, int.MaxValue, 2, int.MaxValue, 3, int.MaxValue, 4 }, true };
+            yield return new object[] { "this_is_a_string", true };
+            yield return new object[] { new StructureWithString(0), true };
             yield return new object[] { new StructureWithPrivateFields(0), true };
             yield return new object[] { new StructureWithPrivateFieldsAndStructs(0), true };
             yield return new object[] { new StructureWithPublicFields(0), true };
@@ -69,12 +71,14 @@ namespace Test
                 int o => exec(o),
                 long o => exec(o),
                 int[] o => exec(o),
+                string o => exec(o),
                 StructureWithPrivateFields o => exec(o),
                 StructureWithPrivateFieldsAndStructs o => exec(o),
                 StructureWithPublicFields o => exec(o),
                 StructureWithPublicFieldsAndStructs o => exec(o),
                 StructureWithArray o => exec(o),
                 StructureWithNonSerialized o => exec(o),
+                StructureWithString o => exec(o),
                 _ => throw new InvalidOperationException("found an unknown type, didn't know what to do!"),
             };
         }
@@ -144,6 +148,16 @@ namespace Test
             public bool Equals(StructureWithArray other)
             {
                 return array.SequenceEqual(other.array);
+            }
+        }
+
+        public struct StructureWithString
+        {
+            public string str;
+
+            public StructureWithString(int _)
+            {
+                str = "hello, world";
             }
         }
 
