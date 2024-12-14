@@ -1,0 +1,33 @@
+name: validate build
+
+on:
+  pull_request:
+    branches:
+      [main]
+  push:
+    branches:
+      [main]
+
+jobs:
+  validate-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            5.0.x
+            6.0.x
+            7.0.x
+            8.0.x
+
+
+      # compile & verify project
+      - name: restore dependencies
+        run: dotnet restore
+      - name: build the project
+        run: dotnet build --configuration Release --no-restore True -warnaserror
+      - name: test the build
+        run: dotnet test
