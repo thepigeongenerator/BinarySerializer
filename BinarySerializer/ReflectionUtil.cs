@@ -3,6 +3,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace ThePigeonGenerator.Util
 {
@@ -39,6 +40,12 @@ namespace ThePigeonGenerator.Util
             // if t is an array, get the size of the array
             if (t.IsArray)
                 return GetArraySize(t, obj, buf);
+
+            // if T is a string, get the length of the string
+            if (t == typeof(string))
+                return buf == null
+                    ? ((obj as string)?.Length * sizeof(char)) + ARR_LEN ?? throw new NullReferenceException("inputted string is not allowed to be 'null' if no buffer is given")
+                    : Marshal.PtrToStructure<int>((IntPtr)buf) + ARR_LEN;
 
             // if t isn't a value type, we don't support it
             if (t.IsValueType == false)
@@ -81,6 +88,19 @@ namespace ThePigeonGenerator.Util
             Marshal.StructureToPtr(arr.Length, (IntPtr)buf, false);
         }
 
+        private static unsafe void SerializeString(string str, byte* buf, int size)
+        {
+            // store the string's length
+            Marshal.StructureToPtr(str.Length, (IntPtr)buf, false);
+
+            // serialize the string
+            fixed (char* ptr = str)
+            {
+                for (int i = 0; i < str.Length; i++)
+                    Marshal.StructureToPtr(ptr[i], (IntPtr)(&buf[(i * sizeof(char)) + ARR_LEN]), false);
+            }
+        }
+
         public static unsafe void SerializeStructure(Type t, object obj, byte* buf, int size)
         {
             // if T is a primitive type (int, float, bool), we can just convert it straight away
@@ -94,6 +114,13 @@ namespace ThePigeonGenerator.Util
             if (t.IsArray)
             {
                 SerializeArray(t, obj, buf, size);
+                return;
+            }
+
+            // of obj is a string, serialize the string
+            if (obj is string str)
+            {
+                SerializeString(str, buf, size);
                 return;
             }
 
@@ -134,6 +161,20 @@ namespace ThePigeonGenerator.Util
             return arr;
         }
 
+        private static unsafe object DeserializeString(byte* buf)
+        {
+            int len = Marshal.PtrToStructure<int>((IntPtr)buf); // convert the bytes reserved to store the array size back to an integer
+            StringBuilder str = new(len);
+
+            for (int i = 0; i < len; i++)
+            {
+                char c = Marshal.PtrToStructure<char>((IntPtr)(&buf[(i * sizeof(char)) + ARR_LEN]));
+                str.Append(c);
+            }
+
+            return str.ToString();
+        }
+
         public static unsafe object? DeserializeStructure(Type t, byte* buf)
         {
             // if T is a primitive type, we can just convert straight away
@@ -143,6 +184,10 @@ namespace ThePigeonGenerator.Util
             // if T is an array, use the array deserialization
             if (t.IsArray)
                 return DeserializeArray(t, buf);
+
+
+            if (t == typeof(string))
+                return DeserializeString(buf);
 
             // if T isn't a value type, we don't support it
             if (t.IsValueType == false)
