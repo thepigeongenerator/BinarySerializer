@@ -5,16 +5,28 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 
+// signed type definitions
+using int8 = System.SByte;
+using int16 = System.Int16;
+using int32 = System.Int32;
+using int64 = System.Int64;
+
+// unsigned type defintions
+using uint8 = System.Byte;
+using uint16 = System.UInt16;
+using uint32 = System.UInt32;
+using uint64 = System.UInt64;
+
 namespace ThePigeonGenerator.Util
 {
     internal static class ReflectionUtil
     {
         private const BindingFlags BINDING_FLAGS = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
-        private const int ARR_LEN = sizeof(int);    // stores the size reserved to store the length of the array
+        private const int32 ARR_LEN = sizeof(uint32); // stores the size reserved to store the length of the array
 
         #region size utility
         // gets the size of an array datastructure
-        private static unsafe int GetArraySize(Type t, object? obj, byte* buf)
+        private static unsafe int32 GetArraySize(Type t, object? obj, uint8* buf)
         {
             // throw exception if there is no way to figure out the array's length
             if (buf == null && obj == null) throw new NullReferenceException($"tried to get the length of array '{t.FullName}', but the specified array was 'null'");
@@ -24,10 +36,10 @@ namespace ThePigeonGenerator.Util
             if (elmtType.IsArray) throw new NotSupportedException($"an error occurred when processing '{t.FullName}' => we do not support multi-dimensional array of this nature, due to their dynamic and thus unknown size");
 
             // get the array sizes
-            int elmtSize = GetStructureSize(elmtType, null); // get the size of the element structure
-            int arrLen = buf == null && obj != null
+            int32 elmtSize = GetStructureSize(elmtType, null); // get the size of the element structure
+            int32 arrLen = buf == null && obj != null
                 ? ((Array)obj).Length                       // get the length of the array object (note: in the case of a multi-dimensional array, this'll contain the amount of items across all dimensions)
-                : Marshal.PtrToStructure<int>((IntPtr)buf); // use the buffer to get the array length
+                : Marshal.PtrToStructure<int32>((IntPtr)buf); // use the buffer to get the array length
 
 
             // multiply together to get the total size (add the reserved size to store the array's size)
@@ -35,7 +47,7 @@ namespace ThePigeonGenerator.Util
         }
 
         // gets the size of a data structure, also serves as a means to validate that the data is in the correct format
-        public static unsafe int GetStructureSize(Type t, object? obj, byte* buf = null)
+        public static unsafe int32 GetStructureSize(Type t, object? obj, uint8* buf = null)
         {
             // if t is an array, get the size of the array
             if (t.IsArray)
@@ -45,7 +57,7 @@ namespace ThePigeonGenerator.Util
             if (t == typeof(string))
                 return buf == null
                     ? ((obj as string)?.Length * sizeof(char)) + ARR_LEN ?? throw new NullReferenceException("inputted string is not allowed to be 'null' if no buffer is given")
-                    : Marshal.PtrToStructure<int>((IntPtr)buf) + ARR_LEN;
+                    : Marshal.PtrToStructure<int32>((IntPtr)buf) + ARR_LEN;
 
             // if t isn't a value type, we don't support it
             if (t.IsValueType == false)
@@ -66,19 +78,19 @@ namespace ThePigeonGenerator.Util
         #endregion // size utility
 
         #region serialization
-        private static unsafe void SerializeArray(Type t, object obj, byte* buf, int size)
+        private static unsafe void SerializeArray(Type t, object obj, uint8* buf, int32 size)
         {
             Type elmtType = t.GetElementType() ?? throw new NullReferenceException($"failed to get the element type of array '{t.FullName}'!");
             Array arr = (Array)obj;
-            int arrSize = size - ARR_LEN; // subtract the array length size from the total size which is used to store the array's size
+            int32 arrSize = size - ARR_LEN; // subtract the array length size from the total size which is used to store the array's size
 
             if (arrSize % arr.Length != 0)
                 throw new Exception("the array's size was not devisable by the element count");
 
             // get the element size by deviding the array size by the length
-            int elmtSize = arrSize / arr.Length;
+            int32 elmtSize = arrSize / arr.Length;
 
-            for (int i = 0; i < arr.Length; i++)
+            for (int32 i = 0; i < arr.Length; i++)
             {
                 object elmt = arr.GetValue(i) ?? throw new NullReferenceException($"failed to get an element with the index of '{i}' in array of type '{t.FullName}'");
                 SerializeStructure(elmtType, elmt, &buf[ARR_LEN + (elmtSize * i)], elmtSize);
@@ -88,7 +100,7 @@ namespace ThePigeonGenerator.Util
             Marshal.StructureToPtr(arr.Length, (IntPtr)buf, false);
         }
 
-        private static unsafe void SerializeString(string str, byte* buf, int size)
+        private static unsafe void SerializeString(string str, uint8* buf, int32 size)
         {
             // store the string's length
             Marshal.StructureToPtr(str.Length, (IntPtr)buf, false);
@@ -96,12 +108,12 @@ namespace ThePigeonGenerator.Util
             // serialize the string
             fixed (char* ptr = str)
             {
-                for (int i = 0; i < str.Length; i++)
+                for (int32 i = 0; i < str.Length; i++)
                     Marshal.StructureToPtr(ptr[i], (IntPtr)(&buf[(i * sizeof(char)) + ARR_LEN]), false);
             }
         }
 
-        public static unsafe void SerializeStructure(Type t, object obj, byte* buf, int size)
+        public static unsafe void SerializeStructure(Type t, object obj, uint8* buf, int32 size)
         {
             // if T is a primitive type (int, float, bool), we can just convert it straight away
             if (t.IsPrimitive)
@@ -125,7 +137,7 @@ namespace ThePigeonGenerator.Util
             }
 
             // loop through each field in t, and call ourselves
-            int i = 0;
+            int32 i = 0;
             foreach (FieldInfo f in t.GetFields(BINDING_FLAGS))
             {
                 // fields with the NonSerialized attribute are not included
@@ -134,7 +146,7 @@ namespace ThePigeonGenerator.Util
 
                 // get the structure size of this field
                 object val = f.GetValue(obj) ?? throw new NullReferenceException($"field '{f.FieldType.FullName}' in '{t.FullName}' is not allowed to be null!");
-                int s = GetStructureSize(f.FieldType, val);
+                int32 s = GetStructureSize(f.FieldType, val);
                 SerializeStructure(f.FieldType, val, &buf[i], s);
                 i += s;
             }
@@ -142,31 +154,31 @@ namespace ThePigeonGenerator.Util
         #endregion // serialization
 
         #region deserialization
-        private static unsafe object DeserializeArray(Type t, byte* buf)
+        private static unsafe object DeserializeArray(Type t, uint8* buf)
         {
             // get the element type of the array
             Type elmtType = t.GetElementType() ?? throw new NullReferenceException($"failed to get the element type of array '{t.FullName}'!");
 
             // allocate an array with the element type and the length
-            int len = Marshal.PtrToStructure<int>((IntPtr)buf); // convert the bytes reserved to store the array size back to an integer
+            int32 len = Marshal.PtrToStructure<int32>((IntPtr)buf); // convert the bytes reserved to store the array size back to an integer
             Array arr = Array.CreateInstance(elmtType, len);
 
             // get the element size and array size
-            int elmtSize = GetStructureSize(elmtType, arr);
+            int32 elmtSize = GetStructureSize(elmtType, arr);
 
             // set the values in the array
-            for (int i = 0; i < len; i++)
+            for (int32 i = 0; i < len; i++)
                 arr.SetValue(DeserializeStructure(elmtType, &buf[ARR_LEN + (i * elmtSize)]), i);
 
             return arr;
         }
 
-        private static unsafe object DeserializeString(byte* buf)
+        private static unsafe object DeserializeString(uint8* buf)
         {
-            int len = Marshal.PtrToStructure<int>((IntPtr)buf); // convert the bytes reserved to store the array size back to an integer
+            int32 len = Marshal.PtrToStructure<int32>((IntPtr)buf); // convert the bytes reserved to store the array size back to an integer
             StringBuilder str = new(len);
 
-            for (int i = 0; i < len; i++)
+            for (int32 i = 0; i < len; i++)
             {
                 char c = Marshal.PtrToStructure<char>((IntPtr)(&buf[(i * sizeof(char)) + ARR_LEN]));
                 str.Append(c);
@@ -175,7 +187,7 @@ namespace ThePigeonGenerator.Util
             return str.ToString();
         }
 
-        public static unsafe object? DeserializeStructure(Type t, byte* buf)
+        public static unsafe object? DeserializeStructure(Type t, uint8* buf)
         {
             // if T is a primitive type, we can just convert straight away
             if (t.IsPrimitive)
@@ -198,7 +210,7 @@ namespace ThePigeonGenerator.Util
             if (obj == null) return null;
 
             // loop through each field in T, and call ourselves.
-            int i = 0;
+            int32 i = 0;
             foreach (FieldInfo f in t.GetFields(BINDING_FLAGS))
             {
                 // fields with the NonSerialized attribute are not included
@@ -206,7 +218,7 @@ namespace ThePigeonGenerator.Util
                     continue;
 
                 // get the structure size of this field
-                int s = GetStructureSize(f.FieldType, null, &buf[i]);
+                int32 s = GetStructureSize(f.FieldType, null, &buf[i]);
 
                 // add the index to the buffer pointer to offset it, thus reading from another part of the array
                 object? val = DeserializeStructure(f.FieldType, &buf[i]);
